@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Random = UnityEngine.Random;
+using ListSampling;
 
 
 public class BoardManager : MonoBehaviour
@@ -61,9 +62,9 @@ public class BoardManager : MonoBehaviour
 			GameObject toInstantiate;
 
 			if (IsEdgePosition (position)) {
-				toInstantiate = SampleFrom (outerWallTiles);
+				toInstantiate = outerWallTiles.SampleFrom();
 			} else {
-				toInstantiate = SampleFrom (floorTiles);
+				toInstantiate = floorTiles.SampleFrom();
 			}
 				
 			GameObject instance = Instantiate (toInstantiate, position, Quaternion.identity) as GameObject;
@@ -77,21 +78,17 @@ public class BoardManager : MonoBehaviour
 	{
 		int objectCount = range.Rand ();
 		for (int i = 0; i < objectCount; i++) {
-			Instantiate (SampleFrom (tiles), RandomPosition (), Quaternion.identity);
+			Instantiate (tiles.SampleFrom(), RandomPosition (), Quaternion.identity);
 		}
 	}
 
 	Vector3 RandomPosition ()
 	{
-		Vector3 position = SampleFrom (gridPositions);
+		Vector3 position = gridPositions.SampleFrom();
 		gridPositions.Remove (position);
 		return position;
 	}
 
-	T SampleFrom<T> (IList<T> list)
-	{
-		return list [Random.Range (0, list.Count)];
-	}
 
 	IEnumerable<Vector3> InnerGameBoardIterator ()
 	{
