@@ -122,7 +122,7 @@ public class BoardManager : MonoBehaviour
 		return new Count (num, num);
 	}
 		
-	void SetupScene (int level)
+	public void SetupScene (int level)
 	{
 		InitializeList ();
 		BoardSetup ();
