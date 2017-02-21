@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using SceneManager = UnityEngine.SceneManagement.SceneManager;
 
 public class Player : MovingObject
@@ -9,6 +10,7 @@ public class Player : MovingObject
 	public int pointsPerFood = 10;
 	public int pointsPerSoda = 20;
 	public float restartLevelDelay = 1f;
+	public Text foodText;
 
 	private Animator animator;
 	private int food;
@@ -18,6 +20,7 @@ public class Player : MovingObject
 		animator = GetComponent<Animator> ();
 
 		food = GameManager.instance.playerFoodPoints;
+		ChangeFood (0);
 
 		base.Start ();
 	}
@@ -49,7 +52,8 @@ public class Player : MovingObject
 
 	protected override void AttemptMove <T> (int xDir, int yDir)
 	{
-		food--;
+		food--; // silently lose a food for the day.
+		ChangeFood (0);
 		base.AttemptMove<T> (xDir, yDir);
 
 		RaycastHit2D hit;
@@ -69,10 +73,10 @@ public class Player : MovingObject
 			Invoke ("Restart", restartLevelDelay);
 			enabled = false;
 		} else if (other.tag == "Food") {
-			food += pointsPerFood;
+			ChangeFood (pointsPerFood);
 			other.gameObject.SetActive (false);
 		} else if (other.tag == "Soda") {
-			food += pointsPerSoda;
+			ChangeFood (pointsPerSoda);
 			other.gameObject.SetActive (false);
 		}
 	}
@@ -87,7 +91,7 @@ public class Player : MovingObject
 	public void LoseFood (int loss)
 	{
 		animator.SetTrigger ("playerHit");
-		food -= loss;
+		ChangeFood (-loss);
 		CheckIfGameOver ();
 	}
 
@@ -102,4 +106,17 @@ public class Player : MovingObject
 			GameManager.instance.GameOver ();
 		}
 	}
+
+	private void ChangeFood(int change)
+	{
+		food += change;
+		if (change > 0) {
+			foodText.text = "+ " + change + " Food: " + food;	
+		} else if (change < 0) {
+			foodText.text = "-" + change + " Food: " + food;	
+		} else {
+			foodText.text = "Food: " + food;
+		}
+	}
+
 }
