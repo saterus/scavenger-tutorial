@@ -23,22 +23,22 @@ public class Player : MovingObject
 	private Animator animator;
 	private int food;
 
-	protected override void Start ()
+	protected override void Start()
 	{
-		animator = GetComponent<Animator> ();
+		animator = transform.Find("Sprite").GetComponent<Animator>();
 
 		food = GameManager.instance.playerFoodPoints;
-		ChangeFood (0);
+		ChangeFood(0);
 
-		base.Start ();
+		base.Start();
 	}
 
-	private void OnDisable ()
+	private void OnDisable()
 	{
 		GameManager.instance.playerFoodPoints = food;
 	}
 
-	void Update ()
+	void Update()
 	{
 		if (!GameManager.instance.playersTurn)
 			return;
@@ -46,88 +46,103 @@ public class Player : MovingObject
 		int horizontal = 0;
 		int vertical = 0;
 
-		horizontal = (int)Input.GetAxisRaw ("Horizontal");
-		vertical = (int)Input.GetAxisRaw ("Vertical");
+		horizontal = (int)Input.GetAxisRaw("Horizontal");
+		vertical = (int)Input.GetAxisRaw("Vertical");
 
-		if (horizontal != 0) {
+		if (horizontal != 0)
+		{
 			vertical = 0;
+			animator.SetFloat("x", horizontal);
 		}
 
-		if (horizontal != 0 || vertical != 0) {
-			AttemptMove<Wall> (horizontal, vertical);
+		if (horizontal != 0 || vertical != 0)
+		{
+			AttemptMove<Wall>(horizontal, vertical);
 		}
 	}
 
-	protected override void AttemptMove <T> (int xDir, int yDir)
+	protected override void AttemptMove<T>(int xDir, int yDir)
 	{
 		food--; // silently lose a food for the day.
-		ChangeFood (0);
-		base.AttemptMove<T> (xDir, yDir);
+		ChangeFood(0);
+		base.AttemptMove<T>(xDir, yDir);
 
 		RaycastHit2D hit;
 
-		if (Move (xDir, yDir, out hit)) {
+		if (Move(xDir, yDir, out hit))
+		{
 			// play sound effect
-			SoundManager.instance.RandomSfx (moveSound1, moveSound2);
+			SoundManager.instance.RandomSfx(moveSound1, moveSound2);
 		}
 
-		CheckIfGameOver ();
+		CheckIfGameOver();
 
 		GameManager.instance.playersTurn = false;
 	}
 
-	private void OnTriggerEnter2D (Collider2D other)
+	private void OnTriggerEnter2D(Collider2D other)
 	{
-		if (other.tag == "Exit") {
-			Invoke ("Restart", restartLevelDelay);
+		if (other.tag == "Exit")
+		{
+			Invoke("Restart", restartLevelDelay);
 			enabled = false;
-		} else if (other.tag == "Food") {
-			ChangeFood (pointsPerFood);
-			SoundManager.instance.RandomSfx (eatSound1, eatSound2);
-			other.gameObject.SetActive (false);
-		} else if (other.tag == "Soda") {
-			ChangeFood (pointsPerSoda);
-			SoundManager.instance.RandomSfx (drinkSound1, drinkSound2);
-			other.gameObject.SetActive (false);
+		}
+		else if (other.tag == "Food")
+		{
+			ChangeFood(pointsPerFood);
+			SoundManager.instance.RandomSfx(eatSound1, eatSound2);
+			other.gameObject.SetActive(false);
+		}
+		else if (other.tag == "Soda")
+		{
+			ChangeFood(pointsPerSoda);
+			SoundManager.instance.RandomSfx(drinkSound1, drinkSound2);
+			other.gameObject.SetActive(false);
 		}
 	}
 
-	protected override void OnCantMove <T> (T component)
+	protected override void OnCantMove<T>(T component)
 	{
 		Wall hitWall = component as Wall;
-		hitWall.DamageWall (wallDamage);
-		animator.SetTrigger ("playerChop");
+		hitWall.DamageWall(wallDamage);
+		animator.SetTrigger("playerChop");
 	}
 
-	public void LoseFood (int loss)
+	public void LoseFood(int loss)
 	{
-		animator.SetTrigger ("playerHit");
-		ChangeFood (-loss);
-		CheckIfGameOver ();
+		animator.SetTrigger("playerHit");
+		ChangeFood(-loss);
+		CheckIfGameOver();
 	}
 
-	private void Restart ()
+	private void Restart()
 	{
-		SceneManager.LoadScene (0);
+		SceneManager.LoadScene(0);
 	}
 
-	private void CheckIfGameOver ()
+	private void CheckIfGameOver()
 	{
-		if (food <= 0) {
-			SoundManager.instance.PlaySingle (gameOverSound);
-			SoundManager.instance.musicSource.Stop ();
-			GameManager.instance.GameOver ();
+		if (food <= 0)
+		{
+			SoundManager.instance.PlaySingle(gameOverSound);
+			SoundManager.instance.musicSource.Stop();
+			GameManager.instance.GameOver();
 		}
 	}
 
-	private void ChangeFood (int change)
+	private void ChangeFood(int change)
 	{
 		food += change;
-		if (change > 0) {
-			foodText.text = "+ " + change + " Food: " + food;	
-		} else if (change < 0) {
-			foodText.text = "-" + change + " Food: " + food;	
-		} else {
+		if (change > 0)
+		{
+			foodText.text = "+ " + change + " Food: " + food;
+		}
+		else if (change < 0)
+		{
+			foodText.text = "-" + change + " Food: " + food;
+		}
+		else
+		{
 			foodText.text = "Food: " + food;
 		}
 	}
